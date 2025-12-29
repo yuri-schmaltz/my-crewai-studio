@@ -58,9 +58,6 @@ class CustomApiTool(BaseTool):
             logging.info(f"[TRACE] custom_api_tool.request.end: {url} duration={end_time-start_time:.3f}s")
             return {
                 "status_code": 500,
-        except Exception as e:
-            return {
-                "status_code": 500,
                 "response": str(e)
             }
 

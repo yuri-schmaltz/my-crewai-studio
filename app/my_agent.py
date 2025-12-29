@@ -34,15 +34,14 @@ class MyAgent:
         ss[self.edit_key] = value
 
     def get_crewai_agent(self) -> Agent:
+        import logging
+        import time
         llm = create_llm(self.llm_provider_model, temperature=self.temperature)
         tools = [tool.create_tool() for tool in self.tools]
-        
         # Add knowledge sources if they exist
         knowledge_sources = []
         if 'knowledge_sources' in ss and self.knowledge_source_ids:
             valid_knowledge_source_ids = []
-            
-            import logging
             for ks_id in self.knowledge_source_ids:
                 ks = next((k for k in ss.knowledge_sources if k.id == ks_id), None)
                 if ks:
@@ -52,7 +51,6 @@ class MyAgent:
                     except Exception as e:
                         logging.error(f"Error loading knowledge source {ks.id}: {str(e)}")
         if knowledge_sources:
-            import time
             logging.info(f"Loaded {len(knowledge_sources)} knowledge sources for agent {self.id}")
             logging.debug(knowledge_sources)
             logging.info(f"[METRIC] agent.knowledge_sources_loaded: {len(knowledge_sources)}")
@@ -61,13 +59,11 @@ class MyAgent:
             # ...existing code...
             end_time = time.time()
             logging.info(f"[TRACE] agent.load_knowledge_sources.end: {self.id} duration={end_time-start_time:.3f}s")
-        return Agent(
-                logging.info(f"[METRIC] agent.created: {self.id}")
-                logging.info(f"[TRACE] agent.create.start: {self.id}")
-                start_time = time.time()
-                # ...existing code...
-                end_time = time.time()
-                logging.info(f"[TRACE] agent.create.end: {self.id} duration={end_time-start_time:.3f}s")
+        # Instrumentação de criação do agente
+        logging.info(f"[METRIC] agent.created: {self.id}")
+        logging.info(f"[TRACE] agent.create.start: {self.id}")
+        start_time = time.time()
+        agent = Agent(
             role=self.role,
             backstory=self.backstory,
             goal=self.goal,
@@ -79,6 +75,9 @@ class MyAgent:
             llm=llm,
             knowledge_sources=knowledge_sources if knowledge_sources else None
         )
+        end_time = time.time()
+        logging.info(f"[TRACE] agent.create.end: {self.id} duration={end_time-start_time:.3f}s")
+        return agent
 
     def delete(self):
         ss.agents = [agent for agent in ss.agents if agent.id != self.id]
