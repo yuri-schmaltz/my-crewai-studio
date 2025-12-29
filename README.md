@@ -32,6 +32,36 @@ bc1qgsn45g02wran4lph5gsyqtk0k7t98zsg6qur0y
 <img src="https://raw.githubusercontent.com/strnad/CrewAI-Studio/main/img/ss3.png" alt="kickoff" style="width:50%;"/><img src="https://raw.githubusercontent.com/strnad/CrewAI-Studio/main/img/ss4.png" alt="kickoff" style="width:50%;"/>
 <img src="https://raw.githubusercontent.com/strnad/CrewAI-Studio/main/img/ss5.png" alt="kickoff" style="width:50%;"/><img src="https://raw.githubusercontent.com/strnad/CrewAI-Studio/main/img/ss6.png" alt="kickoff" style="width:50%;"/>
 
+
+## Environment Variables
+
+Some features require API keys or configuration via environment variables. Set these before running:
+
+- `SCRAPFLY_API_KEY`: Required for Scrapfly web scraping tool.
+- `OPENAI_API_KEY`: Required for OpenAI LLMs.
+- (Add others as needed for your providers/tools)
+
+Example (Linux/macOS):
+```sh
+export SCRAPFLY_API_KEY=your_key_here
+export OPENAI_API_KEY=your_key_here
+```
+Example (Windows CMD):
+```cmd
+set SCRAPFLY_API_KEY=your_key_here
+set OPENAI_API_KEY=your_key_here
+```
+
+## Troubleshooting
+
+- **Missing API Key**: Ensure all required environment variables are set before running.
+- **Docker issues**: Check Docker is running and accessible.
+- **Dependency errors**: Re-run the install scripts or check your Python version.
+- **Network timeouts**: Some tools now have a 10s timeout for external requests. Check your connection or try novamente.
+- **Logs**: The application now usa logs estruturados. Veja o console para mensagens de erro e debug.
+
+If you encounter issues not listed here, consulte os logs ou abra uma issue no GitHub.
+
 ## Installation
 
 ### Using Virtual Environment

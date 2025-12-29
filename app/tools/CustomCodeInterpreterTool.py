@@ -82,12 +82,13 @@ class CustomCodeInterpreterTool(BaseTool):
         Install missing libraries in the Docker container
         """
         if libraries and len(libraries) > 0:
+            import logging
             for library in libraries.split(","):
-                print(f"Installing library: {library}")
+                logging.info(f"Installing library: {library}")
                 install_result = container.exec_run(f"pip install {library}")
                 if install_result.exit_code != 0:
-                    print(f"Something went wrong while installing the library: {library}")
-                    print(install_result.output.decode("utf-8"))
+                    logging.error(f"Something went wrong while installing the library: {library}")
+                    logging.error(install_result.output.decode("utf-8"))
             
 
     def _get_existing_container(self, container_name: str) -> Optional[docker.models.containers.Container]:
@@ -126,14 +127,15 @@ class CustomCodeInterpreterTool(BaseTool):
         # Create a command to decode the base64 string and run the Python code
         cmd_to_run = f'python3 -c "import base64; exec(base64.b64decode(\'{encoded_code}\').decode(\'utf-8\'))"'
         
-        print(f"Running code in container: \n{code}")
+        import logging
+        logging.info(f"Running code in container: \n{code}")
         
         exec_result = container.exec_run(cmd_to_run)
 
         if exec_result.exit_code != 0:
-            print(f"Something went wrong while running the code: \n{exec_result.output.decode('utf-8')}")
+            logging.error(f"Something went wrong while running the code: \n{exec_result.output.decode('utf-8')}")
             return f"Something went wrong while running the code: \n{exec_result.output.decode('utf-8')}"
-        print(f"Code run output: \n{exec_result.output.decode('utf-8')}")
+        logging.info(f"Code run output: \n{exec_result.output.decode('utf-8')}")
         return exec_result.output.decode("utf-8")
     
     def _run_script(self, run_script: str,libraries_used: str) -> str:

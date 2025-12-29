@@ -32,6 +32,9 @@ class CustomApiTool(BaseTool):
         headers = {**self.default_headers, **(headers or {})}
         query_params = {**self.default_query_params, **(query_params or {})}
 
+        import time, logging
+        logging.info(f"[TRACE] custom_api_tool.request.start: {url}")
+        start_time = time.time()
         try:
             response = requests.request(
                 method=method.upper(),
@@ -39,12 +42,22 @@ class CustomApiTool(BaseTool):
                 headers=headers,
                 params=query_params,
                 json=body,
+                timeout=10,
                 verify=False #TODO: add option to disable SSL verification
             )
+            logging.info(f"[METRIC] custom_api_tool.request_success: {url}")
+            end_time = time.time()
+            logging.info(f"[TRACE] custom_api_tool.request.end: {url} duration={end_time-start_time:.3f}s")
             return {
                 "status_code": response.status_code,
                 "response": response.json() if response.headers.get("Content-Type") == "application/json" else response.text
             }
+        except Exception as e:
+            end_time = time.time()
+            logging.error(f"[METRIC] custom_api_tool.request_failed: {url} - {str(e)}")
+            logging.info(f"[TRACE] custom_api_tool.request.end: {url} duration={end_time-start_time:.3f}s")
+            return {
+                "status_code": 500,
         except Exception as e:
             return {
                 "status_code": 500,

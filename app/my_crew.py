@@ -51,12 +51,13 @@ class MyCrew:
             context_tasks = []
             if task.async_execution or task.context_from_async_tasks_ids or task.context_from_sync_tasks_ids:
                 for context_task_id in (task.context_from_async_tasks_ids or []) + (task.context_from_sync_tasks_ids or []):
+                    import logging
                     if context_task_id not in task_objects:
                         context_task = next((t for t in self.tasks if t.id == context_task_id), None)
                         if context_task:
                             context_tasks.append(create_task(context_task))
                         else:
-                            print(f"Warning: Context task with id {context_task_id} not found for task {task.id}")
+                            logging.warning(f"Warning: Context task with id {context_task_id} not found for task {task.id}")
                     else:
                         context_tasks.append(task_objects[context_task_id])
 
@@ -71,7 +72,16 @@ class MyCrew:
 
         # Create all tasks, resolving dependencies recursively
         for task in self.tasks:
-            create_task(task)
+            import time, logging
+            logging.info(f"[TRACE] crew.create_task.start: {task.id}")
+            start_time = time.time()
+            try:
+                create_task(task)
+                logging.info(f"[METRIC] crew.task_created: {task.id}")
+            except Exception as e:
+                logging.error(f"[METRIC] crew.task_failed: {task.id} - {str(e)}")
+            end_time = time.time()
+            logging.info(f"[TRACE] crew.create_task.end: {task.id} duration={end_time-start_time:.3f}s")
 
         # Collect the final list of tasks in the original order
         crewai_tasks = [task_objects[task.id] for task in self.tasks]
@@ -88,7 +98,8 @@ class MyCrew:
                         knowledge_sources.append(ks.get_crewai_knowledge_source())
                         valid_knowledge_source_ids.append(ks_id)
                     except Exception as e:
-                        print(f"Error loading knowledge source {ks.id}: {str(e)}")
+                        import logging
+                        logging.error(f"Error loading knowledge source {ks.id}: {str(e)}")
             
             # If any knowledge sources were invalid, update the list
             if len(valid_knowledge_source_ids) != len(self.knowledge_source_ids):

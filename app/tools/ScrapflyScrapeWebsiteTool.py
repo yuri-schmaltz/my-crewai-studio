@@ -20,20 +20,19 @@ class ScrapflyScrapeWebsiteTool(BaseTool):
     
     def __init__(
         self,
-        api_key: str,
+        api_key: str = None,
         **kwargs,
     ):
         """
         Initialize the Scrapfly tool with API key.
-        
         Args:
-            api_key: Your Scrapfly API key
+            api_key: Your Scrapfly API key (optional, will use env SCRAPFLY_API_KEY if not provided)
         """
+        import os
         super().__init__(**kwargs)
         from scrapfly import ScrapflyClient
-        
-        self.api_key = api_key
-        self.scrapfly = ScrapflyClient(key=api_key)
+        self.api_key = api_key or os.environ.get("SCRAPFLY_API_KEY")
+        self.scrapfly = ScrapflyClient(key=self.api_key)
     
     def _run(
         self,
